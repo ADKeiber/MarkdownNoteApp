@@ -1,20 +1,24 @@
 package com.adk.markdownnoteapp.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.io.File;
+
 @Entity
 @Table(name = "User")
 @Data @NoArgsConstructor
 @AllArgsConstructor
-public class UserEntity {
+public class UserFile {
+
     @Id
     @UuidGenerator
     private String id;
-    private String username;
+    private File file;
+    @ManyToOne
+    @JoinColumn(name="user_id", nullable=false, updatable=false)
+    private UserEntity user;
 }

@@ -6,14 +6,16 @@ import com.adk.markdownnoteapp.model.UserEntity;
 import com.adk.markdownnoteapp.repo.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-@Service @RequiredArgsConstructor @Slf4j
+@Service @Slf4j
 public class UserService implements IUserService {
 
-    private final UserRepo userRepo;
+    private UserRepo userRepo;
 
     @Override
     public String getUserId(String username) {
