@@ -17,9 +17,11 @@ public class UserFile {
     @Id
     @UuidGenerator
     private String id;
-    private File file;
+    private File txtFile;
+    private File markdownFile;
+    private File htmlFile;
     @ManyToOne
     @JoinColumn(name="user_id", nullable=false, updatable=false)
     private UserEntity user;
-    private FileType type;
+
 }
