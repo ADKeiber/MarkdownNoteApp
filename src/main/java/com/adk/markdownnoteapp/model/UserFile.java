@@ -21,4 +21,5 @@ public class UserFile {
     @ManyToOne
     @JoinColumn(name="user_id", nullable=false, updatable=false)
     private UserEntity user;
+    private FileType type;
 }
