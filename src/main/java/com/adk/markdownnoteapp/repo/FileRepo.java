@@ -5,4 +5,6 @@ import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface FileRepo extends ListCrudRepository<UserFile, String> {}
+public interface FileRepo extends ListCrudRepository<UserFile, String> {
+
+}
