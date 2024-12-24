@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UuidGenerator;
 
 @Entity
-@Table(name = "User")
+@Table(name = "MarkdownNoteUser")
 @Data @NoArgsConstructor
 @AllArgsConstructor
 public class UserEntity {

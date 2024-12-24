@@ -10,7 +10,9 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
+import org.commonmark.node.*;
+import org.commonmark.parser.Parser;
+import org.commonmark.renderer.html.HtmlRenderer;
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
@@ -33,7 +35,8 @@ public class FileService implements IFileService {
 
         UserFile userFile = new UserFile();
         try {
-            userFile.setData(file.getBytes());
+            userFile.setMarkdownData(file.getBytes());
+            userFile.setHtmlData(convertToHtml(file));
         } catch (Exception e) {
             //Throw some sort of error
         }
@@ -54,17 +57,30 @@ public class FileService implements IFileService {
 
         String fileName = switch(fileType) {
             case FileType.MARKDOWN -> fileOptional.get().getId() + ".md";
-            case FileType.TXT -> fileOptional.get().getId() + ".txt";
             case FileType.HTML -> fileOptional.get().getId() + ".html";
             default -> throw new IllegalStateException("Unexpected value: " + fileType);
         };
+
+
         File file = new File(fileName);
         try {
-            FileUtils.writeByteArrayToFile(file, fileOptional.get().getData());
+            if(fileType == FileType.MARKDOWN){
+                FileUtils.writeByteArrayToFile(file, fileOptional.get().getMarkdownData());
+            } else {
+                FileUtils.writeByteArrayToFile(file, fileOptional.get().getHtmlData());
+            }
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         return file;
+    }
+
+    private byte[] convertToHtml(MultipartFile file) throws IOException {
+        Parser parser = Parser.builder().build();
+        Node document = parser.parse(new String(file.getBytes()));
+        HtmlRenderer renderer = HtmlRenderer.builder().build();
+        return renderer.render(document).getBytes();
     }
 }

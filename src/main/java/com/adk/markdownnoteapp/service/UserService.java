@@ -5,6 +5,7 @@ import com.adk.markdownnoteapp.errorhandling.UsernameAlreadyExistsException;
 import com.adk.markdownnoteapp.model.UserEntity;
 import com.adk.markdownnoteapp.repo.UserRepo;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -12,6 +13,7 @@ import java.util.Optional;
 @Service @Slf4j
 public class UserService implements IUserService {
 
+    @Autowired
     private UserRepo userRepo;
 
     @Override

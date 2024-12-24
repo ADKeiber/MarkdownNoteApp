@@ -9,7 +9,7 @@ import org.hibernate.annotations.UuidGenerator;
 import java.io.File;
 
 @Entity
-@Table(name = "User")
+@Table(name = "MarkdownFile")
 @Data @NoArgsConstructor
 @AllArgsConstructor
 public class UserFile {
@@ -19,7 +19,10 @@ public class UserFile {
     private String id;
 
     @Lob
-    private byte[] data;
+    private byte[] markdownData;
+
+    @Lob
+    private byte[] htmlData;
 
     @ManyToOne
     @JoinColumn(name="user_id", nullable=false, updatable=false)
