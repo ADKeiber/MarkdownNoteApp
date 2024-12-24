@@ -1,7 +1,6 @@
 package com.adk.markdownnoteapp.controller;
 
 import com.adk.markdownnoteapp.model.FileType;
-import com.adk.markdownnoteapp.repo.FileRepo;
 import com.adk.markdownnoteapp.service.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -16,8 +15,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
-import static com.adk.markdownnoteapp.model.FileType.MARKDOWN;
-
 @RestController
 @RequestMapping("/file")
 public class FileController {
@@ -30,6 +27,11 @@ public class FileController {
         return new ResponseEntity<>(fileService.uploadFile(file, userId), HttpStatus.OK);
     }
 
+    @PostMapping(value = "/update/{fileId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> updateFile(@RequestParam MultipartFile file, @PathVariable String fileId){
+        return new ResponseEntity<>(fileService.updateFile(file, fileId), HttpStatus.OK);
+    }
+
     @GetMapping(value = "/get/{fileId}") // continue https://www.youtube.com/watch?v=wW0nVc2NlhA to improve method
     public ResponseEntity<?> getFileOfType(@RequestParam(name = "fileType", defaultValue = "MARKDOWN" ) FileType fileType, @PathVariable String fileId) throws IOException {
         File file = fileService.getFileWithType(fileId, fileType);
@@ -40,4 +42,15 @@ public class FileController {
                 .body(new InputStreamResource(Files.newInputStream(file.toPath())));
 
     }
+
+    @GetMapping(value = "/checkGrammar/{fileId}")
+    public ResponseEntity<?> checkGrammar(@RequestParam(name = "fileType", defaultValue = "MARKDOWN" ) FileType fileType, @PathVariable String fileId){
+        return new ResponseEntity<>(fileService.checkGrammar(fileType, fileId), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/getFileIds/{userId}")
+    public ResponseEntity<?> getAllFileIdsForUser(@PathVariable String userId){
+        return new ResponseEntity<>(fileService.getAllFileIdsForUser(userId), HttpStatus.OK);
+    }
+
 }

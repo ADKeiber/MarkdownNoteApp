@@ -15,6 +15,7 @@ import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -75,6 +76,43 @@ public class FileService implements IFileService {
         }
 
         return file;
+    }
+
+    @Override
+    public String checkGrammar(FileType fileType, String fileId){
+
+        return "";
+    }
+
+    @Override
+    public String getAllFileIdsForUser(String userId){
+        Optional<List<UserFile>> files = fileRepo.findByUserId(userId);
+
+        if(files.isEmpty())
+            throw new EntityNotFoundException(UserFile.class, "user.id", userId);
+        return "";
+    }
+
+    @Override
+    public String updateFile(MultipartFile file, String fileId) {
+        Optional<UserFile> optionalUserFile = fileRepo.findById(fileId);
+
+        if(optionalUserFile.isEmpty())
+            throw new EntityNotFoundException(UserFile.class, "id", fileId);
+
+        UserFile userFile = new UserFile();
+        try {
+            userFile.setMarkdownData(file.getBytes());
+            userFile.setHtmlData(convertToHtml(file));
+        } catch (Exception e) {
+            //Throw some sort of error
+        }
+
+        userFile.setUser(optionalUserFile.get().getUser());
+
+        UserFile savedFile  = fileRepo.save(userFile);
+
+        return savedFile.getId();
     }
 
     private byte[] convertToHtml(MultipartFile file) throws IOException {
