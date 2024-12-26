@@ -48,6 +48,12 @@ public class FileController {
         return new ResponseEntity<>(fileService.checkGrammar(fileType, fileId), HttpStatus.OK);
     }
 
+    @GetMapping("/grammar/supportedLanguages")
+    public ResponseEntity<Object> getSupportedLanguages() throws IOException, InterruptedException {
+
+        return new ResponseEntity<>("", HttpStatus.OK);
+    }
+
     @GetMapping(value = "/getFileIds/{userId}")
     public ResponseEntity<?> getAllFileIdsForUser(@PathVariable String userId){
         return new ResponseEntity<>(fileService.getAllFileIdsForUser(userId), HttpStatus.OK);

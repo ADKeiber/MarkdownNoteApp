@@ -1,13 +1,16 @@
 package com.adk.markdownnoteapp.service;
 
+import com.adk.markdownnoteapp.dto.LanguageDTO;
 import com.adk.markdownnoteapp.errorhandling.EntityNotFoundException;
 import com.adk.markdownnoteapp.model.FileType;
 import com.adk.markdownnoteapp.model.UserEntity;
 import com.adk.markdownnoteapp.model.UserFile;
 import com.adk.markdownnoteapp.repo.FileRepo;
 import com.adk.markdownnoteapp.repo.UserRepo;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.commonmark.node.*;
@@ -15,17 +18,30 @@ import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class FileService implements IFileService {
 
-    @Autowired
-    FileRepo fileRepo;
+    private final Environment env;
+    private final String languageToolURL;
+    private final ObjectMapper objectMapper;
+    private final FileRepo fileRepo;
+    private final UserRepo userRepo;
 
     @Autowired
-    UserRepo userRepo;
+    FileService(Environment env, ObjectMapper objectMapper, FileRepo fileRepo, UserRepo userRepo){
+        this.env = env;
+        this.objectMapper = objectMapper;
+        languageToolURL = env.getProperty("language-tool-api.url");
+        this.fileRepo = fileRepo;
+        this.userRepo = userRepo;
+    }
 
     @Override
     public String uploadFile(MultipartFile file, String userId) {
@@ -115,10 +131,22 @@ public class FileService implements IFileService {
         return savedFile.getId();
     }
 
+    public List<LanguageDTO> getSupportedLanguages() throws IOException, InterruptedException {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(languageToolURL + "/v2/languages"))
+                .method("GET", HttpRequest.BodyPublishers.noBody()).build();
+
+        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+
+        return objectMapper.readValue(response.body(),  objectMapper.getTypeFactory().constructCollectionType(List.class, LanguageDTO.class));
+    }
+
     private byte[] convertToHtml(MultipartFile file) throws IOException {
         Parser parser = Parser.builder().build();
         Node document = parser.parse(new String(file.getBytes()));
         HtmlRenderer renderer = HtmlRenderer.builder().build();
         return renderer.render(document).getBytes();
     }
+
+//    private
 }
