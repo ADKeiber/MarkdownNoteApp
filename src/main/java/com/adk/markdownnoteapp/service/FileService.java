@@ -1,12 +1,14 @@
 package com.adk.markdownnoteapp.service;
 
 import com.adk.markdownnoteapp.dto.LanguageDTO;
+import com.adk.markdownnoteapp.dto.MatchDTO;
 import com.adk.markdownnoteapp.errorhandling.EntityNotFoundException;
 import com.adk.markdownnoteapp.model.FileType;
 import com.adk.markdownnoteapp.model.UserEntity;
 import com.adk.markdownnoteapp.model.UserFile;
 import com.adk.markdownnoteapp.repo.FileRepo;
 import com.adk.markdownnoteapp.repo.UserRepo;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,16 +21,20 @@ import org.commonmark.renderer.html.HtmlRenderer;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class FileService implements IFileService {
 
-    private final Environment env;
     private final String languageToolURL;
     private final ObjectMapper objectMapper;
     private final FileRepo fileRepo;
@@ -36,7 +42,6 @@ public class FileService implements IFileService {
 
     @Autowired
     FileService(Environment env, ObjectMapper objectMapper, FileRepo fileRepo, UserRepo userRepo){
-        this.env = env;
         this.objectMapper = objectMapper;
         languageToolURL = env.getProperty("language-tool-api.url");
         this.fileRepo = fileRepo;
@@ -95,12 +100,6 @@ public class FileService implements IFileService {
     }
 
     @Override
-    public String checkGrammar(FileType fileType, String fileId){
-
-        return "";
-    }
-
-    @Override
     public String getAllFileIdsForUser(String userId){
         Optional<List<UserFile>> files = fileRepo.findByUserId(userId);
 
@@ -131,14 +130,61 @@ public class FileService implements IFileService {
         return savedFile.getId();
     }
 
-    public List<LanguageDTO> getSupportedLanguages() throws IOException, InterruptedException {
+    @Override
+    public List<LanguageDTO> getSupportedLanguages() {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(languageToolURL + "/v2/languages"))
                 .method("GET", HttpRequest.BodyPublishers.noBody()).build();
 
-        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = null;
+        try {
+            response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
-        return objectMapper.readValue(response.body(),  objectMapper.getTypeFactory().constructCollectionType(List.class, LanguageDTO.class));
+        try {
+            return objectMapper.readValue(response.body(),  objectMapper.getTypeFactory().constructCollectionType(List.class, LanguageDTO.class));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public List<MatchDTO> checkGrammar(File file, String language){
+        HttpClient client = HttpClient.newHttpClient();
+//        HttpRequest.BodyPublisher bp;
+//        //This is for markup option
+//        if( params.get("text") != null){
+//            /**
+//             * Need to process data into proper format
+//             * ex:
+//             *  'A <b>Let test the grammar</b>'
+//             *
+//             *  becomes
+//             *
+//             * {"annotation":[
+//             *  {"text": "A "},
+//             *  {"markup": "<b>"},
+//             *  {"text": "Let test the grammar"},
+//             *  {"markup": "</b>"}
+//             * ]}
+//             */
+//            String text = params.get("text");
+//        } else {
+//            bp = getParamsUrlEncoded(params);
+//        }
+//        HttpRequest request= HttpRequest.newBuilder()
+//                .uri(URI.create(languageToolURL + "/v2/check"))
+//                .headers("Content-Type", "application/x-www-form-urlencoded")
+////                .POST(getParamsUrlEncoded(params))
+////                .POST(HttpRequest.BodyPublishers.ofString(data))
+//                .build();
+//        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+//        return objectMapper.readValue(response.body(),  objectMapper.getTypeFactory().constructCollectionType(List.class, HttpRequest.class));
+        return new LinkedList<>();
     }
 
     private byte[] convertToHtml(MultipartFile file) throws IOException {
@@ -148,5 +194,12 @@ public class FileService implements IFileService {
         return renderer.render(document).getBytes();
     }
 
-//    private
+    private HttpRequest.BodyPublisher getParamsUrlEncoded(Map<String, String> parameters) {
+
+        String urlEncoded = parameters.entrySet()
+                .stream()
+                .map(e -> e.getKey() + "=" + URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8))
+                .collect(Collectors.joining("&"));
+        return HttpRequest.BodyPublishers.ofString(urlEncoded);
+    }
 }

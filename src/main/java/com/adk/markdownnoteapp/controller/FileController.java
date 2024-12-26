@@ -14,6 +14,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/file")
@@ -40,18 +42,17 @@ public class FileController {
                 .contentLength(file.length())
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(new InputStreamResource(Files.newInputStream(file.toPath())));
-
     }
 
     @GetMapping(value = "/checkGrammar/{fileId}")
-    public ResponseEntity<?> checkGrammar(@RequestParam(name = "fileType", defaultValue = "MARKDOWN" ) FileType fileType, @PathVariable String fileId){
-        return new ResponseEntity<>(fileService.checkGrammar(fileType, fileId), HttpStatus.OK);
+    public ResponseEntity<?> checkGrammar(@PathVariable String fileId, @RequestParam String language){
+        File file = fileService.getFileWithType(fileId, FileType.HTML);
+        return new ResponseEntity<>(fileService.checkGrammar(file, language), HttpStatus.OK);
     }
 
     @GetMapping("/grammar/supportedLanguages")
     public ResponseEntity<Object> getSupportedLanguages() throws IOException, InterruptedException {
-
-        return new ResponseEntity<>("", HttpStatus.OK);
+        return new ResponseEntity<>(fileService.getSupportedLanguages(), HttpStatus.OK);
     }
 
     @GetMapping(value = "/getFileIds/{userId}")
