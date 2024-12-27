@@ -163,21 +163,32 @@ public class FileService implements IFileService {
                 int i = 0;
                 while( i < line.length()){
                     String subString = line.substring(i);
+                    System.out.println("Substring: " + subString);
                     int markupStart = subString.indexOf("<");
                     int markupEnd = subString.indexOf(">");
-                    if(markupStart == -1){
+                    System.out.println("Beginning: " + markupStart);
+                    System.out.println("End: " + markupEnd);
+                    if(markupStart == -1 || markupEnd == -1){ // A complete tag doesn't exist on this line
+                        System.out.println(1);
                         data.add(Map.entry("text", subString));
                         i = line.length();
+                    } else if ( markupStart < markupEnd){ // both beginning and end brackets exist
+                        System.out.println(2);
+                        data.add(Map.entry("markup", subString.substring(markupStart, markupEnd+1)));
+                        i += markupEnd + 1;
+                    } else {
+                        System.out.println(4);
+                        i = line.length();
                     }
-
-
+                    System.out.println("Current Index: " + i);
                 }
-                System.out.println(line);
+                System.out.println("Line Length: " + line.length());
                 // read next line
                 line = reader.readLine();
             }
 
             reader.close();
+            System.out.println(data);
         } catch (IOException e) {
             e.printStackTrace();
         }
