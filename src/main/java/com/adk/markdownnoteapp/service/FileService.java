@@ -18,18 +18,15 @@ import org.springframework.web.multipart.MultipartFile;
 import org.commonmark.node.*;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
-import java.io.File;
-import java.io.IOException;
+
+import java.io.*;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -153,7 +150,38 @@ public class FileService implements IFileService {
     }
 
     @Override
-    public List<MatchDTO> checkGrammar(File file, String language){
+    public List<MatchDTO> checkGrammar(File file, String language) {
+
+        List<Map.Entry<String, String>> data = new ArrayList<>();
+
+        //breaks up html data into text and markup
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            String line = reader.readLine();
+
+            while (line != null) {
+                int i = 0;
+                while( i < line.length()){
+                    String subString = line.substring(i);
+                    int markupStart = subString.indexOf("<");
+                    int markupEnd = subString.indexOf(">");
+                    if(markupStart == -1){
+                        data.add(Map.entry("text", subString));
+                        i = line.length();
+                    }
+
+
+                }
+                System.out.println(line);
+                // read next line
+                line = reader.readLine();
+            }
+
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         HttpClient client = HttpClient.newHttpClient();
 //        HttpRequest.BodyPublisher bp;
 //        //This is for markup option

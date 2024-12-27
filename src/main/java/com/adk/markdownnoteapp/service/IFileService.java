@@ -6,6 +6,7 @@ import com.adk.markdownnoteapp.model.FileType;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.List;
 
 public interface IFileService {
@@ -14,5 +15,5 @@ public interface IFileService {
     String getAllFileIdsForUser(String userId);
     String updateFile(MultipartFile file, String fileId);
     List<LanguageDTO> getSupportedLanguages();
-    List<MatchDTO> checkGrammar(File file, String language);
+    List<MatchDTO> checkGrammar(File file, String language) throws FileNotFoundException;
 }

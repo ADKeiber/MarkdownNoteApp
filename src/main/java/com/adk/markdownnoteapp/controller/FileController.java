@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashMap;
@@ -45,7 +46,7 @@ public class FileController {
     }
 
     @GetMapping(value = "/checkGrammar/{fileId}")
-    public ResponseEntity<?> checkGrammar(@PathVariable String fileId, @RequestParam String language){
+    public ResponseEntity<?> checkGrammar(@PathVariable String fileId, @RequestParam String language) throws FileNotFoundException {
         File file = fileService.getFileWithType(fileId, FileType.HTML);
         return new ResponseEntity<>(fileService.checkGrammar(file, language), HttpStatus.OK);
     }
