@@ -155,63 +155,54 @@ public class FileService implements IFileService {
         List<Map.Entry<String, String>> data = new ArrayList<>();
         Map<String, String> params = new HashMap<>();
         StringBuilder fileText = new StringBuilder();
+        params.put("language", language);
         //breaks up html data into text and markup
         try {
             BufferedReader reader = new BufferedReader(new FileReader(file));
             String line = reader.readLine();
 
             while (line != null) {
-                int i = 0;
-                while( i < line.length()){
-                    String subString = line.substring(i);
-                    System.out.println("Substring: " + subString);
-                    int markupStart = subString.indexOf("<");
-                    int markupEnd = subString.indexOf(">");
-                    System.out.println("Beginning: " + markupStart);
-                    System.out.println("End: " + markupEnd);
-                    if(markupStart == -1 || markupEnd == -1){ // A complete tag doesn't exist on this line
-                        System.out.println(1);
-                        fileText.append(subString);
-//                        params.add("{\"text\": \"" + subString + "},");
-//                        data.add(Map.entry("text", subString));
-                        i = line.length();
-                    } else if ( markupStart < markupEnd){// both beginning and end brackets exist
-                        System.out.println(2);
-                        if(markupStart != 0){
-                            fileText.append(subString.substring(0, markupStart));
-//                            params.add("{\"text\": \"" + subString.substring(0, markupStart) + "},");
-//                            data.add(Map.entry("text", subString.substring(0, markupStart)));
-                            i += markupStart;
-                        } else {
-
-//                            params.add("{\"markup\": \"" + subString.substring(markupStart, markupEnd+1) + "},");
-//                            data.add(Map.entry("markup", subString.substring(markupStart, markupEnd+1)));
-                            i += markupEnd + 1;
-                        }
-
-
-                    } else {
-                        System.out.println(4);
-                        i = line.length();
-                    }
-                    System.out.println("Current Index: " + i);
-                }
-                System.out.println("Line Length: " + line.length());
-                // read next line
+//                int i = 0;
+//                while( i < line.length()){
+//                    String subString = line.substring(i);
+//                    int markupStart = subString.indexOf("<");
+//                    int markupEnd = subString.indexOf(">");
+//                    if(markupStart == -1 || markupEnd == -1){ // A complete tag doesn't exist on this line
+//                        fileText.append(subString);
+////                        params.add("{\"text\": \"" + subString + "},");
+////                        data.add(Map.entry("text", subString));
+//                        i = line.length();
+//                    } else if ( markupStart < markupEnd){// both beginning and end brackets exist
+//                        if(markupStart != 0){
+//                            fileText.append(subString.substring(0, markupStart));
+////                            params.add("{\"text\": \"" + subString.substring(0, markupStart) + "},");
+////                            data.add(Map.entry("text", subString.substring(0, markupStart)));
+//                            i += markupStart;
+//                        } else {
+////                            params.add("{\"markup\": \"" + subString.substring(markupStart, markupEnd+1) + "},");
+////                            data.add(Map.entry("markup", subString.substring(markupStart, markupEnd+1)));
+//                            i += markupEnd + 1;
+//                        }
+//                    } else {
+//                        i = line.length();
+//                    }
+//                }
+                fileText.append(line).append(" ");
                 line = reader.readLine();
             }
-
             reader.close();
-            System.out.println(params);
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        params.put("text", fileText.toString());
+        System.out.println("Params: " + params);
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request= HttpRequest.newBuilder()
                 .uri(URI.create(languageToolURL + "/v2/check"))
                 .headers("Content-Type", "application/x-www-form-urlencoded")
-//                .POST("text=")
+                .POST(getParamsUrlEncoded(params))
                 .build();
         HttpResponse<String> response = null;
 
@@ -221,7 +212,7 @@ public class FileService implements IFileService {
             throw new RuntimeException(e);
         }
         try {
-            return objectMapper.readValue(response.body(),  objectMapper.getTypeFactory().constructCollectionType(List.class, HttpRequest.class));
+            return objectMapper.readValue(response.body(),  objectMapper.getTypeFactory().constructCollectionType(List.class, MatchDTO.class));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -234,12 +225,11 @@ public class FileService implements IFileService {
         return renderer.render(document).getBytes();
     }
 
-//    private HttpRequest.BodyPublisher getParamsUrlEncoded(Map<String, String> parameters) {
-//
-//        String urlEncoded = parameters.entrySet()
-//                .stream()
-//                .map(e -> e.getKey() + "=" + URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8))
-//                .collect(Collectors.joining("&"));
-//        return HttpRequest.BodyPublishers.ofString(urlEncoded);
-//    }
+    private HttpRequest.BodyPublisher getParamsUrlEncoded(Map<String, String> parameters) {
+        String urlEncoded = parameters.entrySet()
+                .stream()
+                .map(e -> e.getKey() + "=" + URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8))
+                .collect(Collectors.joining("&"));
+        return HttpRequest.BodyPublishers.ofString(urlEncoded);
+    }
 }
