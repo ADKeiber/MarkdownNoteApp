@@ -172,10 +172,17 @@ public class FileService implements IFileService {
                         System.out.println(1);
                         data.add(Map.entry("text", subString));
                         i = line.length();
-                    } else if ( markupStart < markupEnd){ // both beginning and end brackets exist
+                    } else if ( markupStart < markupEnd){// both beginning and end brackets exist
                         System.out.println(2);
-                        data.add(Map.entry("markup", subString.substring(markupStart, markupEnd+1)));
-                        i += markupEnd + 1;
+                        if(markupStart != 0){
+                            data.add(Map.entry("text", subString.substring(0, markupStart)));
+                            i += markupStart;
+                        } else {
+                            data.add(Map.entry("markup", subString.substring(markupStart, markupEnd+1)));
+                            i += markupEnd + 1;
+                        }
+
+
                     } else {
                         System.out.println(4);
                         i = line.length();
