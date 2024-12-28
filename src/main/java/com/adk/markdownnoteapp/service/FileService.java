@@ -153,7 +153,8 @@ public class FileService implements IFileService {
     public List<MatchDTO> checkGrammar(File file, String language) {
 
         List<Map.Entry<String, String>> data = new ArrayList<>();
-
+        Map<String, String> params = new HashMap<>();
+        StringBuilder fileText = new StringBuilder();
         //breaks up html data into text and markup
         try {
             BufferedReader reader = new BufferedReader(new FileReader(file));
@@ -170,15 +171,21 @@ public class FileService implements IFileService {
                     System.out.println("End: " + markupEnd);
                     if(markupStart == -1 || markupEnd == -1){ // A complete tag doesn't exist on this line
                         System.out.println(1);
-                        data.add(Map.entry("text", subString));
+                        fileText.append(subString);
+//                        params.add("{\"text\": \"" + subString + "},");
+//                        data.add(Map.entry("text", subString));
                         i = line.length();
                     } else if ( markupStart < markupEnd){// both beginning and end brackets exist
                         System.out.println(2);
                         if(markupStart != 0){
-                            data.add(Map.entry("text", subString.substring(0, markupStart)));
+                            fileText.append(subString.substring(0, markupStart));
+//                            params.add("{\"text\": \"" + subString.substring(0, markupStart) + "},");
+//                            data.add(Map.entry("text", subString.substring(0, markupStart)));
                             i += markupStart;
                         } else {
-                            data.add(Map.entry("markup", subString.substring(markupStart, markupEnd+1)));
+
+//                            params.add("{\"markup\": \"" + subString.substring(markupStart, markupEnd+1) + "},");
+//                            data.add(Map.entry("markup", subString.substring(markupStart, markupEnd+1)));
                             i += markupEnd + 1;
                         }
 
@@ -195,42 +202,29 @@ public class FileService implements IFileService {
             }
 
             reader.close();
-            System.out.println(data);
+            System.out.println(params);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         HttpClient client = HttpClient.newHttpClient();
-//        HttpRequest.BodyPublisher bp;
-//        //This is for markup option
-//        if( params.get("text") != null){
-//            /**
-//             * Need to process data into proper format
-//             * ex:
-//             *  'A <b>Let test the grammar</b>'
-//             *
-//             *  becomes
-//             *
-//             * {"annotation":[
-//             *  {"text": "A "},
-//             *  {"markup": "<b>"},
-//             *  {"text": "Let test the grammar"},
-//             *  {"markup": "</b>"}
-//             * ]}
-//             */
-//            String text = params.get("text");
-//        } else {
-//            bp = getParamsUrlEncoded(params);
-//        }
-//        HttpRequest request= HttpRequest.newBuilder()
-//                .uri(URI.create(languageToolURL + "/v2/check"))
-//                .headers("Content-Type", "application/x-www-form-urlencoded")
-////                .POST(getParamsUrlEncoded(params))
-////                .POST(HttpRequest.BodyPublishers.ofString(data))
-//                .build();
-//        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-//        return objectMapper.readValue(response.body(),  objectMapper.getTypeFactory().constructCollectionType(List.class, HttpRequest.class));
-        return new LinkedList<>();
+        HttpRequest request= HttpRequest.newBuilder()
+                .uri(URI.create(languageToolURL + "/v2/check"))
+                .headers("Content-Type", "application/x-www-form-urlencoded")
+//                .POST("text=")
+                .build();
+        HttpResponse<String> response = null;
+
+        try {
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            return objectMapper.readValue(response.body(),  objectMapper.getTypeFactory().constructCollectionType(List.class, HttpRequest.class));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private byte[] convertToHtml(MultipartFile file) throws IOException {
@@ -240,12 +234,12 @@ public class FileService implements IFileService {
         return renderer.render(document).getBytes();
     }
 
-    private HttpRequest.BodyPublisher getParamsUrlEncoded(Map<String, String> parameters) {
-
-        String urlEncoded = parameters.entrySet()
-                .stream()
-                .map(e -> e.getKey() + "=" + URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8))
-                .collect(Collectors.joining("&"));
-        return HttpRequest.BodyPublishers.ofString(urlEncoded);
-    }
+//    private HttpRequest.BodyPublisher getParamsUrlEncoded(Map<String, String> parameters) {
+//
+//        String urlEncoded = parameters.entrySet()
+//                .stream()
+//                .map(e -> e.getKey() + "=" + URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8))
+//                .collect(Collectors.joining("&"));
+//        return HttpRequest.BodyPublishers.ofString(urlEncoded);
+//    }
 }
