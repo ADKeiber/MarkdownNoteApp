@@ -1,5 +1,6 @@
 package com.adk.markdownnoteapp.service;
 
+import com.adk.markdownnoteapp.dto.GrammarCheckDTO;
 import com.adk.markdownnoteapp.dto.LanguageDTO;
 import com.adk.markdownnoteapp.dto.MatchDTO;
 import com.adk.markdownnoteapp.errorhandling.EntityNotFoundException;
@@ -150,7 +151,7 @@ public class FileService implements IFileService {
     }
 
     @Override
-    public List<MatchDTO> checkGrammar(File file, String language) {
+    public GrammarCheckDTO checkGrammar(File file, String language) {
 
         List<Map.Entry<String, String>> data = new ArrayList<>();
         Map<String, String> params = new HashMap<>();
@@ -212,7 +213,7 @@ public class FileService implements IFileService {
             throw new RuntimeException(e);
         }
         try {
-            return objectMapper.readValue(response.body(),  objectMapper.getTypeFactory().constructCollectionType(List.class, MatchDTO.class));
+            return  objectMapper.readValue(response.body().toString(), GrammarCheckDTO.class);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

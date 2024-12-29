@@ -1,5 +1,6 @@
 package com.adk.markdownnoteapp.service;
 
+import com.adk.markdownnoteapp.dto.GrammarCheckDTO;
 import com.adk.markdownnoteapp.dto.LanguageDTO;
 import com.adk.markdownnoteapp.dto.MatchDTO;
 import com.adk.markdownnoteapp.model.FileType;
@@ -15,5 +16,5 @@ public interface IFileService {
     String getAllFileIdsForUser(String userId);
     String updateFile(MultipartFile file, String fileId);
     List<LanguageDTO> getSupportedLanguages();
-    List<MatchDTO> checkGrammar(File file, String language) throws FileNotFoundException;
+    GrammarCheckDTO checkGrammar(File file, String language) throws FileNotFoundException;
 }
