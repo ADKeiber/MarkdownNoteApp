@@ -4,6 +4,7 @@ import com.adk.markdownnoteapp.dto.GrammarCheckDTO;
 import com.adk.markdownnoteapp.dto.LanguageDTO;
 import com.adk.markdownnoteapp.dto.MatchDTO;
 import com.adk.markdownnoteapp.errorhandling.EntityNotFoundException;
+import com.adk.markdownnoteapp.errorhandling.ThirdPartyAPIException;
 import com.adk.markdownnoteapp.model.FileType;
 import com.adk.markdownnoteapp.model.UserEntity;
 import com.adk.markdownnoteapp.model.UserFile;
@@ -153,7 +154,6 @@ public class FileService implements IFileService {
     @Override
     public GrammarCheckDTO checkGrammar(File file, String language) {
 
-        List<Map.Entry<String, String>> data = new ArrayList<>();
         Map<String, String> params = new HashMap<>();
         StringBuilder fileText = new StringBuilder();
         params.put("language", language);
@@ -163,32 +163,26 @@ public class FileService implements IFileService {
             String line = reader.readLine();
 
             while (line != null) {
-//                int i = 0;
-//                while( i < line.length()){
-//                    String subString = line.substring(i);
-//                    int markupStart = subString.indexOf("<");
-//                    int markupEnd = subString.indexOf(">");
-//                    if(markupStart == -1 || markupEnd == -1){ // A complete tag doesn't exist on this line
-//                        fileText.append(subString);
-////                        params.add("{\"text\": \"" + subString + "},");
-////                        data.add(Map.entry("text", subString));
-//                        i = line.length();
-//                    } else if ( markupStart < markupEnd){// both beginning and end brackets exist
-//                        if(markupStart != 0){
-//                            fileText.append(subString.substring(0, markupStart));
-////                            params.add("{\"text\": \"" + subString.substring(0, markupStart) + "},");
-////                            data.add(Map.entry("text", subString.substring(0, markupStart)));
-//                            i += markupStart;
-//                        } else {
-////                            params.add("{\"markup\": \"" + subString.substring(markupStart, markupEnd+1) + "},");
-////                            data.add(Map.entry("markup", subString.substring(markupStart, markupEnd+1)));
-//                            i += markupEnd + 1;
-//                        }
-//                    } else {
-//                        i = line.length();
-//                    }
-//                }
-                fileText.append(line).append(" ");
+                int i = 0;
+                while( i < line.length()){
+                    String subString = line.substring(i);
+                    int markupStart = subString.indexOf("<");
+                    int markupEnd = subString.indexOf(">");
+                    if(markupStart == -1 || markupEnd == -1){ // A complete tag doesn't exist on this line
+                        fileText.append(subString);
+                        i = line.length();
+                    } else if ( markupStart < markupEnd){// both beginning and end brackets exist
+                        if(markupStart != 0){
+                            fileText.append(subString.substring(0, markupStart));
+                            i += markupStart;
+                        } else {
+                            i += markupEnd + 1;
+                        }
+                    } else {
+                        i = line.length();
+                    }
+                }
+                fileText.append("\n");
                 line = reader.readLine();
             }
             reader.close();
@@ -197,7 +191,6 @@ public class FileService implements IFileService {
         }
 
         params.put("text", fileText.toString());
-        System.out.println("Params: " + params);
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request= HttpRequest.newBuilder()
@@ -209,13 +202,9 @@ public class FileService implements IFileService {
 
         try {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        try {
             return  objectMapper.readValue(response.body().toString(), GrammarCheckDTO.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+        } catch (IOException | InterruptedException e) {
+            throw new ThirdPartyAPIException("Language Tool");
         }
     }
 
