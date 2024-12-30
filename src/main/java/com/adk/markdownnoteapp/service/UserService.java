@@ -10,12 +10,18 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+/**
+ * Implementation of the {@link IUserService} interface
+ */
 @Service @Slf4j
 public class UserService implements IUserService {
 
     @Autowired
     private UserRepo userRepo;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getUserId(String username) {
         Optional<UserEntity> user = userRepo.findByUsername(username);
@@ -24,6 +30,9 @@ public class UserService implements IUserService {
         return  user.get().getId();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String createUser(String username) {
         if(userRepo.existsByUsername(username))

@@ -31,6 +31,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Implementation of {@link IFileService} interface
+ */
 @Service
 public class FileService implements IFileService {
 
@@ -47,6 +50,9 @@ public class FileService implements IFileService {
         this.userRepo = userRepo;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String uploadFile(MultipartFile file, String userId) {
         Optional<UserEntity> userOptional = userRepo.findById(userId);
@@ -69,6 +75,9 @@ public class FileService implements IFileService {
         return savedFile.getId();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public File getFileWithType(String fileId, FileType fileType) {
         Optional<UserFile> fileOptional = fileRepo.findById(fileId);
@@ -98,6 +107,9 @@ public class FileService implements IFileService {
         return file;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getAllFileIdsForUser(String userId){
         Optional<List<UserFile>> files = fileRepo.findByUserId(userId);
@@ -107,6 +119,9 @@ public class FileService implements IFileService {
         return "";
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String updateFile(MultipartFile file, String fileId) {
         Optional<UserFile> optionalUserFile = fileRepo.findById(fileId);
@@ -129,6 +144,9 @@ public class FileService implements IFileService {
         return savedFile.getId();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<LanguageDTO> getSupportedLanguages() {
         HttpRequest request = HttpRequest.newBuilder()
@@ -151,6 +169,9 @@ public class FileService implements IFileService {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public GrammarCheckDTO checkGrammar(File file, String language) {
 
@@ -208,6 +229,11 @@ public class FileService implements IFileService {
         }
     }
 
+    /**
+     * Converts a MarkdownFile into HTML
+     * @param file {@link MultipartFile} markdown file to be converted
+     * @return {@link Byte[]} the data for the converted html file
+     */
     private byte[] convertToHtml(MultipartFile file) {
         Parser parser = Parser.builder().build();
         Node document = null;
@@ -220,6 +246,11 @@ public class FileService implements IFileService {
         return renderer.render(document).getBytes();
     }
 
+    /**
+     * Encodes the paramaters into the url for a request to Language Tool API
+     * @param parameters Map of key {@link String} and value {@link String} containing the parameter values
+     * @return {@link HttpRequest.BodyPublisher}
+     */
     private HttpRequest.BodyPublisher getParamsUrlEncoded(Map<String, String> parameters) {
         String urlEncoded = parameters.entrySet()
                 .stream()

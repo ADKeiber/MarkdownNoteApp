@@ -10,6 +10,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
 
+/**
+ * Interface containing the required methods to interact with user files
+ */
 public interface IFileService {
     String uploadFile(MultipartFile file, String userId);
     File getFileWithType(String fileId, FileType fileType);
