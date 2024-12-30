@@ -88,6 +88,17 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
+     * Handle RuntimeException.
+     *
+     * @param ex      RuntimeException
+     * @return the ApiError object
+     */
+    @ExceptionHandler(RuntimeException.class)
+    protected ResponseEntity<Object> handleRuntimeException(RuntimeException ex) {
+        return buildResponseEntity(new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, ex));
+    }
+
+    /**
      * Handle HttpMessageNotWritableException.
      *
      * @param ex      HttpMessageNotWritableException

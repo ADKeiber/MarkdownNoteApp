@@ -208,9 +208,14 @@ public class FileService implements IFileService {
         }
     }
 
-    private byte[] convertToHtml(MultipartFile file) throws IOException {
+    private byte[] convertToHtml(MultipartFile file) {
         Parser parser = Parser.builder().build();
-        Node document = parser.parse(new String(file.getBytes()));
+        Node document = null;
+        try {
+            document = parser.parse(new String(file.getBytes()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         HtmlRenderer renderer = HtmlRenderer.builder().build();
         return renderer.render(document).getBytes();
     }
