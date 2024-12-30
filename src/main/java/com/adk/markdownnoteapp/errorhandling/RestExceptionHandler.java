@@ -147,19 +147,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponseEntity(apiError);
     }
 
-    /**
-     * Handle Exception, handle generic Exception.class
-     *
-     * @param ex the Exception
-     * @return the ApiError object
-     */
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    protected ResponseEntity<Object> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex, WebRequest request) {
-        ApiError apiError = new ApiError(BAD_REQUEST);
-        apiError.setMessage(String.format("The parameter '%s' of value '%s' could not be converted to type '%s'", ex.getName(), ex.getValue(), ex.getRequiredType().getSimpleName()));
-        apiError.setDebugMessage(ex.getMessage());
-        return buildResponseEntity(apiError);
-    }
+
     ////////////////////////////////////////
     ////////// Custom Exceptions ///////////
     ////////////////////////////////////////
@@ -173,6 +161,19 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(EntityNotFoundException.class)
     protected ResponseEntity<Object> handleEntityNotFound(EntityNotFoundException ex) {
         ApiError apiError = new ApiError(NOT_FOUND);
+        apiError.setMessage(ex.getMessage());
+        return buildResponseEntity(apiError);
+    }
+
+    /**
+     * Handles ThirdPartyAPIException. Created to encapsulate errors with more detail than ThirdPartyAPIException.
+     *
+     * @param ex the ThirdPartyAPIException
+     * @return the ApiError object
+     */
+    @ExceptionHandler(ThirdPartyAPIException.class)
+    protected ResponseEntity<Object> handleThirdPartyError(ThirdPartyAPIException ex) {
+        ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR);
         apiError.setMessage(ex.getMessage());
         return buildResponseEntity(apiError);
     }
