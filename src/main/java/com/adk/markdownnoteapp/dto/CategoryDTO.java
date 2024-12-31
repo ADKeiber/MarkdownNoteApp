@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
 
+/**
+ * DTO containing the category of a {@link MatchDTO}
+ */
 public class CategoryDTO implements Serializable {
 
     @JsonProperty("id")

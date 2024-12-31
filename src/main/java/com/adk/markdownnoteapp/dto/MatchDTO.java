@@ -5,6 +5,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * DTO containing the match for a grammar check
+ */
 public class MatchDTO implements Serializable  {
 
     @JsonProperty("message")

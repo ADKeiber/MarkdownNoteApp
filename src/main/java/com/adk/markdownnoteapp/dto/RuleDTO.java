@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
 
+/**
+ * DTO containing the rule for a specific {@link MatchDTO}
+ */
 public class RuleDTO implements Serializable {
 
     @JsonProperty("id")
