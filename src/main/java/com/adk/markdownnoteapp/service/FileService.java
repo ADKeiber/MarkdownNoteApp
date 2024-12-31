@@ -111,12 +111,14 @@ public class FileService implements IFileService {
      * {@inheritDoc}
      */
     @Override
-    public String getAllFileIdsForUser(String userId){
+    public List<String> getAllFileIdsForUser(String userId){
         Optional<List<UserFile>> files = fileRepo.findByUserId(userId);
 
         if(files.isEmpty())
             throw new EntityNotFoundException(UserFile.class, "user.id", userId);
-        return "";
+        List<String> fileIds = new ArrayList<>();
+        files.get().forEach(file ->  fileIds.add(file.getId()));
+        return fileIds;
     }
 
     /**
