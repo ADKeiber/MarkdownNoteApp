@@ -14,11 +14,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.adk.markdownnoteapp.dto.GrammarCheckDTO;
 import com.adk.markdownnoteapp.dto.LanguageDTO;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Controller used to interact with files

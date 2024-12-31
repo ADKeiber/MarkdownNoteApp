@@ -6,8 +6,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.io.File;
-
+/**
+ * Database entity used to hold information about a user's file
+ */
 @Entity
 @Table(name = "MarkdownFile")
 @Data @NoArgsConstructor

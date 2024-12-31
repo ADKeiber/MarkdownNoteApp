@@ -8,6 +8,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UuidGenerator;
 
+/**
+ * Database entity used to hold user information
+ */
 @Entity
 @Table(name = "MarkdownNoteUser")
 @Data @NoArgsConstructor

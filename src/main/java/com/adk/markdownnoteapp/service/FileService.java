@@ -2,7 +2,6 @@ package com.adk.markdownnoteapp.service;
 
 import com.adk.markdownnoteapp.dto.GrammarCheckDTO;
 import com.adk.markdownnoteapp.dto.LanguageDTO;
-import com.adk.markdownnoteapp.dto.MatchDTO;
 import com.adk.markdownnoteapp.errorhandling.EntityNotFoundException;
 import com.adk.markdownnoteapp.errorhandling.ThirdPartyAPIException;
 import com.adk.markdownnoteapp.model.FileType;
@@ -86,8 +85,8 @@ public class FileService implements IFileService {
             throw new EntityNotFoundException(UserFile.class, "id", fileId);
 
         String fileName = switch(fileType) {
-            case FileType.MARKDOWN -> fileOptional.get().getId() + ".md";
-            case FileType.HTML -> fileOptional.get().getId() + ".html";
+            case MARKDOWN -> fileOptional.get().getId() + ".md";
+            case HTML -> fileOptional.get().getId() + ".html";
             default -> throw new IllegalStateException("Unexpected value: " + fileType);
         };
 
